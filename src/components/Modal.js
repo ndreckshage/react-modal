@@ -8,8 +8,6 @@ import SafeHTMLElement from '../helpers/safeHTMLElement';
 export const portalClassName = 'ReactModalPortal';
 export const bodyOpenClassName = 'ReactModal__Body--open';
 
-const renderSubtreeIntoContainer = ReactDOM.unstable_renderSubtreeIntoContainer;
-
 function getParentElement(parentSelector) {
   return parentSelector();
 }
@@ -96,6 +94,10 @@ export default class Modal extends Component {
     }
   };
 
+  state = {
+    mounted: true
+  }
+
   componentDidMount() {
     this.node = document.createElement('div');
     this.node.className = this.props.portalClassName;
@@ -103,7 +105,7 @@ export default class Modal extends Component {
     const parent = getParentElement(this.props.parentSelector);
     parent.appendChild(this.node);
 
-    this.renderPortal(this.props);
+    this.setState({ mounted: true }); // eslint-disable-line
   }
 
   componentWillReceiveProps(newProps) {
@@ -118,8 +120,6 @@ export default class Modal extends Component {
       currentParent.removeChild(this.node);
       newParent.appendChild(this.node);
     }
-
-    this.renderPortal(newProps);
   }
 
   componentWillUpdate(newProps) {
@@ -154,13 +154,18 @@ export default class Modal extends Component {
     parent.removeChild(this.node);
   }
 
-  renderPortal = props => {
-    this.portal = renderSubtreeIntoContainer(this, (
-      <ModalPortal defaultStyles={Modal.defaultStyles} {...props} />
-    ), this.node);
-  }
-
   render() {
-    return null;
+    if (!this.node || !this.state.mounted) {
+      return null;
+    }
+
+    return ReactDOM.unstable_createPortal(
+      <ModalPortal
+        ref={portal => { this.portal = portal; }}
+        defaultStyles={Modal.defaultStyles}
+        {...this.props}
+      />,
+      this.node
+    );
   }
 }
