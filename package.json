@@ -1,5 +1,5 @@
 {
-  "name": "react-modal",
+  "name": "@humblespark/react-modal",
   "version": "2.3.2",
   "description": "Accessible modal dialog component for React.JS",
   "main": "./lib/index.js",
